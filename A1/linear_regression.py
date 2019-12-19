@@ -1,0 +1,102 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+
+def hypothesis(theta_array, x):
+    return theta_array[0] + theta_array[1] * x
+
+
+def cost_func(
+    theta_array,
+    x_val,
+    y_val,
+    m,
+    ):
+    error = 0
+    for i in range(m):
+        error += (theta_array[0] + theta_array[1] * x_val[i]
+                  - y_val[i]) ** 2
+    return error / (2 * m)
+
+
+def training(
+    x_train,
+    y_train,
+    alpha,
+    iters,
+    ):
+    m = x_train.size
+    theta_0 = 0
+    theta_1 = 0
+    theta_array = [theta_0, theta_1]
+    cost_func_values = []
+    for i in range(iters):
+        theta_array = improvise_thetas(theta_array, x_train, y_train,
+                alpha, m)
+        cost_func_values.append(cost_func(theta_array, x_train,
+                                y_train, m))
+
+    if i % 10 == 0:
+        print ('value of theta_0 at iteration %d is: ' % i,
+               theta_array[0])
+        print ('value of theta_1 at iteration %d is: ' % i,
+               theta_array[1], '\n')
+
+    x = np.arange(0, len(cost_func_values), step=1)
+    return theta_array
+
+
+def improvise_thetas(
+    theta_array,
+    X,
+    Y,
+    alpha,
+    m,
+    ):
+    summation_0 = 0
+    summation_1 = 0
+    for i in range(m):
+        summation_0 += theta_array[0] + theta_array[1] * X[i] - Y[i]
+        summation_1 += X[i] * (theta_array[1] + theta_array[1] * X[i]
+                               - Y[i])
+    new_theta_0 = theta_array[0] - alpha * (summation_0 / m)
+    new_theta_1 = theta_array[1] - alpha * (summation_1 / m)
+    updated_theta_array = [new_theta_0, new_theta_1]
+    return updated_theta_array
+
+
+def testing(x_test, y_test, theta_array):
+    m = x_test.size
+    for i in range(m):
+        prediction = hypothesis(theta_array, x_test[i])
+
+
+def plot_regression_line(x, y, b):
+    plt.scatter(x, y, color='m', marker='o', s=30)
+    y_pred = b[0] + b[1] * x
+    plt.plot(x, y_pred, color='g')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.show()
+
+
+if __name__ == '__main__':
+    
+    x_train = np.array([10,9,2,15,10,16,11,16])
+    y_train = np.array([95,80,10,50,45,98,38,93])
+
+    alpha = 0.005
+    iters = 50
+    theta_array = training(x_train, y_train, alpha, iters)
+
+    print ('\n*** The final value of theta_0 is ', theta_array[0],
+           ' and theta_1 is ', theta_array[1], ' ***\n')
+
+    print ('\n*** The equation is : Y = ', theta_array[1], 'X + ',
+           theta_array[0], ' ***\n')
+
+    plot_regression_line(x_train, y_train, theta_array)
+
